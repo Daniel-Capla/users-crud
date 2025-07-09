@@ -4,6 +4,8 @@ import com.morosys.userscrud.models.User
 import com.morosys.userscrud.models.dto.UserRegistrationForm
 import com.morosys.userscrud.repositories.UserRepository
 import org.springframework.stereotype.Service
+import java.util.UUID
+import kotlin.jvm.optionals.getOrNull
 
 @Service
 class UserService(
@@ -11,6 +13,10 @@ class UserService(
 ) {
     fun findAll(): List<User> {
         return userRepository.findAll().toList()
+    }
+
+    fun findById(id: UUID): User? {
+        return userRepository.findById(id).getOrNull()
     }
 
     fun register(userRegistrationForm: UserRegistrationForm): User {
