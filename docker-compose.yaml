@@ -1,0 +1,11 @@
+version: '1.0'
+services:
+  postgres:
+    image: 'postgres:latest'
+    container_name: "morosystems"
+    environment:
+      POSTGRES_DB: morosystems
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - '54329:5432'
