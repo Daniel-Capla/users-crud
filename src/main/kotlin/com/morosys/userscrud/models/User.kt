@@ -15,5 +15,7 @@ class User(
     val lastName: String,
     val userName: String? = null,
     val email: String,
-    val password: String
+    val password: String,
+    @Transient
+    val accessToken: String
 )
