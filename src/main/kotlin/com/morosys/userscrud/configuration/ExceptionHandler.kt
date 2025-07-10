@@ -15,7 +15,7 @@ class ExceptionHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .body(exception.message ?: "Not found")
             //TODO need to be more robust in order to be done
-            else -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request")
+            else -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.message)
         }
     }
 }

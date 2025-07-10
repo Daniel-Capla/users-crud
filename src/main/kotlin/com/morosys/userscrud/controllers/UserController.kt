@@ -5,6 +5,7 @@ import com.morosys.userscrud.exceptions.NotFoundException
 import com.morosys.userscrud.models.User
 import com.morosys.userscrud.models.dto.UserRegistrationForm
 import com.morosys.userscrud.services.UserService
+import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -42,10 +43,9 @@ class UserController(
 
     @PostMapping("/register")
     fun register(
-        @RequestBody userForm: String
+        @RequestBody @Valid userForm: UserRegistrationForm
     ): ResponseEntity<User> {
-        val userRegistrationForm = objectMapper.readValue(userForm, UserRegistrationForm::class.java)
-        val registeredUser = userService.register(userRegistrationForm)
+        val registeredUser = userService.register(userForm)
 
         return ResponseEntity.status(HttpStatus.CREATED).body(registeredUser)
     }

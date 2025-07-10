@@ -1,0 +1,8 @@
+ALTER TABLE users
+    ADD created_at TIMESTAMP WITH TIME ZONE;
+
+ALTER TABLE users
+    ADD deleted_at TIMESTAMP WITH TIME ZONE;
+
+ALTER TABLE users
+    ADD last_updated_at TIMESTAMP WITH TIME ZONE;
