@@ -14,8 +14,7 @@ class Security {
         http
             .authorizeHttpRequests { authz ->
                 authz
-                    .requestMatchers("/user*").permitAll()
-                    .requestMatchers("/register").permitAll()
+                    .requestMatchers("/*").permitAll()
                     .anyRequest().authenticated()
             }
             .csrf { it.disable() } // Disable CSRF for development
