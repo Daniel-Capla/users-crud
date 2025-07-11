@@ -67,12 +67,11 @@ class UserService(
         return user
     }
 
-    fun update(id: UUID, newPassword: String?, newUserName: String?): User {
-        val userInDb = userRepository.findById(id).getOrNull() ?: throw NotFoundException("User not found")
-        newPassword?.let { userInDb.password = it }
-        newUserName?.let { userInDb.userName = processNewUserNameRequest(newUserName) }
+    fun update(userToUpdate: User, newPassword: String?, newUserName: String?): User {
+        newPassword?.let { userToUpdate.password = passwordEncoder.encode(it) }
+        newUserName?.let { userToUpdate.userName = processNewUserNameRequest(newUserName) }
 
-        return userRepository.save(userInDb)
+        return userRepository.save(userToUpdate)
     }
 
     fun softDelete(id: UUID) {

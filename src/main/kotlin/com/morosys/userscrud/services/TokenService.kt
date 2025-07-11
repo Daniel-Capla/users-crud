@@ -1,5 +1,7 @@
 package com.morosys.userscrud.services
 
+import com.morosys.userscrud.models.User
+import com.morosys.userscrud.repositories.UserRepository
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
@@ -11,7 +13,8 @@ import javax.crypto.SecretKey
 @Service
 class TokenService(
     @Value("\${jwt.secret}")
-    private val secret: String
+    private val secret: String,
+    private val userRepository: UserRepository
 ) {
     private val signingKey: SecretKey = Keys.hmacShaKeyFor(secret.toByteArray())
 
@@ -27,6 +30,11 @@ class TokenService(
 
     fun extractUsername(token: String): String {
         return extractAllClaims(token).subject
+    }
+
+    fun extractUserByUsername(username: String): User {
+        return userRepository.findByUserName(username)
+            ?: throw com.morosys.userscrud.exceptions.NotFoundException("User not found")
     }
 
     private fun extractAllClaims(token: String): Claims {
