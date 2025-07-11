@@ -75,7 +75,7 @@ class UserService(
         return userRepository.save(userInDb)
     }
 
-    fun delete(id: UUID) {
+    fun softDelete(id: UUID) {
         val userInDb = userRepository.findById(id).getOrNull() ?: throw NotFoundException("User not found")
         // Soft delete first
         userInDb.deletedAt = Instant.now()
@@ -83,8 +83,9 @@ class UserService(
         userRepository.save(userInDb)
     }
 
-    fun adminDelete(id: UUID) {
+    fun hardDelete(id: UUID) {
         val userInDb = userRepository.findById(id).getOrNull() ?: throw NotFoundException("User not found")
+        // Create log for audit purposes first, then delete
         auditFileService.createNew(
             AuditFile(
                 json = objectMapper.writeValueAsString(userInDb)

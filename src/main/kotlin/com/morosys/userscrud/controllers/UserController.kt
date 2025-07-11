@@ -1,6 +1,5 @@
 package com.morosys.userscrud.controllers
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.morosys.userscrud.exceptions.NotFoundException
 import com.morosys.userscrud.models.User
 import com.morosys.userscrud.models.dto.AuthenticationRequest
@@ -23,7 +22,6 @@ import java.util.UUID
 @RestController
 class UserController(
     private val userService: UserService,
-    private val objectMapper: ObjectMapper
 ) {
     @GetMapping("/users")
     fun findAllUsers(
@@ -33,6 +31,7 @@ class UserController(
     }
 
     @GetMapping("/user")
+    @PreAuthorize("hasRole('COMMUNITY')")
     fun findUser(
         @RequestParam @org.hibernate.validator.constraints.UUID id: String
     ): ResponseEntity<User> {
@@ -65,11 +64,10 @@ class UserController(
     }
 
     @DeleteMapping("/delete")
-    @PreAuthorize("hasRole('ADMIN')")
     fun delete(
         @RequestParam @org.hibernate.validator.constraints.UUID id: String
     ): ResponseEntity<String> {
-        userService.delete(UUID.fromString(id))
+        userService.softDelete(UUID.fromString(id))
 
         return ResponseEntity.status(HttpStatus.OK).body("Deleted!")
     }
@@ -83,5 +81,22 @@ class UserController(
         return ResponseEntity.status(HttpStatus.OK).body(user)
     }
 
-    //TODO add validation of input fields, proper login + registration, add env variables, add JWT security, add User soft delete + real delete (maybe new table for audit purposes), add tests, add github actions ci/cd?, add ip2location?
+    @DeleteMapping("/admin-delete")
+    @PreAuthorize("hasRole('ADMIN')")
+    fun adminDelete(
+        @RequestParam @org.hibernate.validator.constraints.UUID id: String
+    ): ResponseEntity<String> {
+        userService.hardDelete(UUID.fromString(id))
+
+        return ResponseEntity.status(HttpStatus.OK).body("ADMIN deleted!")
+    }
+
+    //TODO add validation of input fields,
+// proper login + registration - DONE,
+// add env variables - DONE,
+// add JWT security - DONE,
+// add User soft delete + real delete (maybe new table for audit purposes) - DONE,
+// add tests,
+// add github actions ci/cd?,
+// add ip2location?
 }
