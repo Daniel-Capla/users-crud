@@ -32,7 +32,7 @@ class UserController(
 
     @GetMapping("/user")
     fun findUser(
-        @RequestParam id: String
+        @RequestParam @org.hibernate.validator.constraints.UUID id: String
     ): ResponseEntity<User> {
         val user = userService.findById(UUID.fromString(id))
 
@@ -53,7 +53,7 @@ class UserController(
 
     @PutMapping("/update")
     fun update(
-        @RequestParam id: String,
+        @RequestParam @org.hibernate.validator.constraints.UUID id: String,
         @RequestParam password: String? = null,
         @RequestParam @Valid @Size(min = 3, max = 20) username: String? = null
     ): ResponseEntity<User> {
@@ -64,7 +64,7 @@ class UserController(
 
     @DeleteMapping("/delete")
     fun delete(
-        @RequestParam id: String
+        @RequestParam @org.hibernate.validator.constraints.UUID id: String
     ): ResponseEntity<String> {
         userService.delete(UUID.fromString(id))
 

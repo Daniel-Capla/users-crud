@@ -8,6 +8,7 @@ data class UserRegistrationForm(
     val email: String,
     val firstName: String,
     val lastName: String,
-    @field:Size(min = 6, max = 12) val password: String,
+    @field:Size(min = 6, max = 12)
+    val password: String,
     val userName: String? = null
 )
