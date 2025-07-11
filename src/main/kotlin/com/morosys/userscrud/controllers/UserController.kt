@@ -6,6 +6,7 @@ import com.morosys.userscrud.models.User
 import com.morosys.userscrud.models.dto.UserRegistrationForm
 import com.morosys.userscrud.services.UserService
 import jakarta.validation.Valid
+import jakarta.validation.constraints.Size
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -53,9 +54,10 @@ class UserController(
     @PutMapping("/update")
     fun update(
         @RequestParam id: String,
-        @RequestParam password: String
+        @RequestParam password: String? = null,
+        @RequestParam @Valid @Size(min = 3, max = 20) userName: String? = null
     ): ResponseEntity<User> {
-        val updatedUser = userService.update(UUID.fromString(id), password)
+        val updatedUser = userService.update(UUID.fromString(id), password, userName)
 
         return ResponseEntity.status(HttpStatus.OK).body(updatedUser)
     }
@@ -69,5 +71,5 @@ class UserController(
         return ResponseEntity.status(HttpStatus.OK).body("Deleted!")
     }
 
-    //TODO add validation of input fields, proper login + registration
+    //TODO add validation of input fields, proper login + registration, add env variables, add JWT security, add User soft delete + real delete (maybe new table for audit purposes), add tests, add github actions ci/cd?, add ip2location?
 }

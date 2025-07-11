@@ -20,6 +20,10 @@ class UserService(
         return userRepository.findById(id).getOrNull()
     }
 
+    fun findByUserName(userName: String): User? {
+        return userRepository.findByUserName(userName)
+    }
+
     fun register(userRegistrationForm: UserRegistrationForm): User {
         val savedUser = userRepository.save(
             User(
@@ -27,11 +31,12 @@ class UserService(
                 lastName = userRegistrationForm.lastName,
                 email = userRegistrationForm.email,
                 password = userRegistrationForm.password,
-                userName = userRegistrationForm.userName ?: generateGenericUserName(
-                    userRegistrationForm.firstName,
-                    userRegistrationForm.lastName,
-                    userRegistrationForm.email
-                ),
+                userName = userRegistrationForm.userName?.let { // If username exists, generate random userName
+                    when (checkIfUserNameTaken(it)) {
+                        true -> generateRandomUserName(userRegistrationForm.email)
+                        else -> it
+                    }
+                } ?: generateRandomUserName(userRegistrationForm.email),
                 accessToken = "" //TODO to be implemented
             )
         )
@@ -39,10 +44,10 @@ class UserService(
         return savedUser
     }
 
-    fun update(id: UUID, newPassword: String): User {
+    fun update(id: UUID, newPassword: String?, newUserName: String?): User {
         val userInDb = userRepository.findById(id).getOrNull() ?: throw NotFoundException("User not found")
-        userInDb.password = newPassword
-
+        newPassword?.let { userInDb.password = it }
+        newUserName?.let { userInDb.userName = it }
         return userRepository.save(userInDb)
     }
 
@@ -51,8 +56,33 @@ class UserService(
         userRepository.delete(userInDb)
     }
 
-    private fun generateGenericUserName(firstName: String, lastName: String, email: String): String {
-        //TODO to be implemented
-        return ""
+    private fun generateRandomUserName(email: String): String {
+        val emailString = email.substring(0, 2)
+        var generatedUserName = emailString + generateRandomString(3)
+
+        while (checkIfUserNameTaken(generatedUserName) == true) {
+            generatedUserName = emailString + generateRandomString(3)
+        }
+
+        return generatedUserName
+    }
+
+    private fun generateRandomString(length: Int): String {
+        val chars = ('A'..'Z') + ('0'..'9')
+        var result = ""
+        while (result.length < length) {
+            result += chars.random()
+        }
+
+        return result
+    }
+
+    private fun checkIfUserNameTaken(userName: String): Boolean {
+        val user = findByUserName(userName)
+
+        return when (user) {
+            null -> false
+            else -> true
+        }
     }
 }

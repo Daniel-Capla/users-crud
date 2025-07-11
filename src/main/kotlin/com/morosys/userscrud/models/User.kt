@@ -19,7 +19,7 @@ class User(
     val firstName: String,
     val lastName: String,
     @Column(unique = true)
-    val userName: String? = null,
+    var userName: String? = null,
     @Column(unique = true)
     val email: String,
     @JsonIgnore
