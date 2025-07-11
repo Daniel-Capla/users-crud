@@ -4,6 +4,7 @@ import com.morosys.userscrud.exceptions.NotFoundException
 import com.morosys.userscrud.models.User
 import com.morosys.userscrud.models.dto.UserRegistrationForm
 import com.morosys.userscrud.repositories.UserRepository
+import org.apache.coyote.BadRequestException
 import org.springframework.stereotype.Service
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
@@ -47,7 +48,8 @@ class UserService(
     fun update(id: UUID, newPassword: String?, newUserName: String?): User {
         val userInDb = userRepository.findById(id).getOrNull() ?: throw NotFoundException("User not found")
         newPassword?.let { userInDb.password = it }
-        newUserName?.let { userInDb.userName = it }
+        newUserName?.let { userInDb.userName = processNewUserNameRequest(newUserName) }
+
         return userRepository.save(userInDb)
     }
 
@@ -83,6 +85,13 @@ class UserService(
         return when (user) {
             null -> false
             else -> true
+        }
+    }
+
+    private fun processNewUserNameRequest(userName: String): String {
+        return when (checkIfUserNameTaken(userName)) {
+            true -> throw BadRequestException("Username already taken!")
+            else -> userName
         }
     }
 }

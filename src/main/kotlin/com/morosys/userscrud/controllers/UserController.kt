@@ -55,9 +55,9 @@ class UserController(
     fun update(
         @RequestParam id: String,
         @RequestParam password: String? = null,
-        @RequestParam @Valid @Size(min = 3, max = 20) userName: String? = null
+        @RequestParam @Valid @Size(min = 3, max = 20) username: String? = null
     ): ResponseEntity<User> {
-        val updatedUser = userService.update(UUID.fromString(id), password, userName)
+        val updatedUser = userService.update(UUID.fromString(id), password, username)
 
         return ResponseEntity.status(HttpStatus.OK).body(updatedUser)
     }
