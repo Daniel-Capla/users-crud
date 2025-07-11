@@ -30,5 +30,5 @@ class User(
     val createdAt: Instant? = null,
     @UpdateTimestamp
     val lastUpdatedAt: Instant? = null,
-    val deletedAt: Instant? = null
+    var deletedAt: Instant? = null
 )

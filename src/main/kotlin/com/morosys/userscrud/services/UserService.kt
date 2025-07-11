@@ -6,6 +6,7 @@ import com.morosys.userscrud.models.dto.UserRegistrationForm
 import com.morosys.userscrud.repositories.UserRepository
 import org.apache.coyote.BadRequestException
 import org.springframework.stereotype.Service
+import java.time.Instant
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
 
@@ -14,7 +15,7 @@ class UserService(
     private val userRepository: UserRepository
 ) {
     fun findAll(): List<User> {
-        return userRepository.findAll().toList()
+        return userRepository.findAll().filter { user -> user.deletedAt == null }.toList()
     }
 
     fun findById(id: UUID): User? {
@@ -55,7 +56,10 @@ class UserService(
 
     fun delete(id: UUID) {
         val userInDb = userRepository.findById(id).getOrNull() ?: throw NotFoundException("User not found")
-        userRepository.delete(userInDb)
+        // Soft delete first
+        userInDb.deletedAt = Instant.now()
+
+        userRepository.save(userInDb)
     }
 
     private fun generateRandomUserName(email: String): String {
