@@ -1,6 +1,8 @@
 package com.morosys.userscrud.services
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.morosys.userscrud.exceptions.NotFoundException
+import com.morosys.userscrud.models.AuditFile
 import com.morosys.userscrud.models.User
 import com.morosys.userscrud.models.dto.UserRegistrationForm
 import com.morosys.userscrud.repositories.UserRepository
@@ -12,7 +14,9 @@ import kotlin.jvm.optionals.getOrNull
 
 @Service
 class UserService(
-    private val userRepository: UserRepository
+    private val auditFileService: AuditFileService,
+    private val userRepository: UserRepository,
+    private val objectMapper: ObjectMapper
 ) {
     fun findAll(): List<User> {
         return userRepository.findAll().filter { user -> user.deletedAt == null }.toList()
@@ -60,6 +64,17 @@ class UserService(
         userInDb.deletedAt = Instant.now()
 
         userRepository.save(userInDb)
+    }
+
+    fun adminDelete(id: UUID) {
+        val userInDb = userRepository.findById(id).getOrNull() ?: throw NotFoundException("User not found")
+        auditFileService.createNew(
+            AuditFile(
+                json = objectMapper.writeValueAsString(userInDb)
+            )
+        )
+
+        userRepository.delete(userInDb)
     }
 
     private fun generateRandomUserName(email: String): String {
