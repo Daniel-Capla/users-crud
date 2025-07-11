@@ -3,6 +3,7 @@ package com.morosys.userscrud.services
 import com.morosys.userscrud.models.dto.AuthenticationRequest
 import com.morosys.userscrud.models.dto.AuthenticationResponse
 import com.morosys.userscrud.repositories.RefreshTokenRepository
+import com.morosys.userscrud.repositories.UserRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.AuthenticationServiceException
@@ -21,7 +22,8 @@ class AuthenticationService(
     @Value("\${jwt.accessTokenExpiration}")
     private val accessTokenExpiration: Int = 0,
     @Value("\${jwt.refreshTokenExpiration}")
-    private val refreshTokenExpiration: Int = 0
+    private val refreshTokenExpiration: Int = 0,
+    private val userRepository: UserRepository
 ) {
     fun authentication(authenticationRequest: AuthenticationRequest): AuthenticationResponse {
         authManager.authenticate(
@@ -59,8 +61,12 @@ class AuthenticationService(
     }
 
     private fun createAccessToken(user: UserDetails): String {
+        val userInDb = userRepository.findByUserName(user.username)!!
+        val claims = HashMap<String, Any>()
+        claims["roles"] = userInDb.role
         return tokenService.generateToken(
             subject = user.username,
+            additionalClaims = claims,
             expiration = Date(System.currentTimeMillis() + accessTokenExpiration)
         )
     }
@@ -69,5 +75,4 @@ class AuthenticationService(
         subject = user.username,
         expiration = Date(System.currentTimeMillis() + refreshTokenExpiration)
     )
-
 }

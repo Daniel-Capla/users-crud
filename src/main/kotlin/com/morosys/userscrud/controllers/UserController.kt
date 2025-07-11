@@ -72,7 +72,7 @@ class UserController(
         return ResponseEntity.status(HttpStatus.OK).body("Deleted!")
     }
 
-    @PostMapping
+    @PostMapping("/login")
     fun login(
         @RequestBody @Valid authenticationRequest: AuthenticationRequest
     ): ResponseEntity<User> {

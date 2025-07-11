@@ -45,7 +45,7 @@ class SecurityConfig {
             .csrf { it.disable() }
             .authorizeHttpRequests {
                 it
-                    .requestMatchers("/login", "/register")
+                    .requestMatchers("/login", "/register", "/api/auth/login")
                     .permitAll()
                     .anyRequest()
                     .fullyAuthenticated()
@@ -55,6 +55,7 @@ class SecurityConfig {
             }
             .authenticationProvider(authenticaationProvider)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+            .formLogin { it.disable() }
 
         return http.build()
     }
