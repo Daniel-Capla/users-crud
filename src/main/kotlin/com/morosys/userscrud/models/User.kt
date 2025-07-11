@@ -1,6 +1,7 @@
 package com.morosys.userscrud.models
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.morosys.userscrud.models.enums.UserRole
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -18,6 +19,7 @@ class User(
     val id: UUID? = null,
     val firstName: String,
     val lastName: String,
+    val role: UserRole = UserRole.USER,
     @Column(unique = true)
     var userName: String? = null,
     @Column(unique = true)
