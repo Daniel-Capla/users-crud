@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.morosys.userscrud.models.enums.UserRole
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -19,6 +21,7 @@ class User(
     val id: UUID? = null,
     val firstName: String,
     val lastName: String,
+    @Enumerated(value = EnumType.STRING)
     val role: UserRole = UserRole.USER,
     @Column(unique = true)
     var userName: String? = null,
