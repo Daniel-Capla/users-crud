@@ -27,7 +27,7 @@ class User(
     @JsonIgnore
     var password: String,
     @Transient
-    val accessToken: String,
+    var accessToken: String,
     @CreationTimestamp
     val createdAt: Instant? = null,
     @UpdateTimestamp

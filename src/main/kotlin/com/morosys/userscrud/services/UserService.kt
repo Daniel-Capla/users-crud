@@ -4,19 +4,28 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.morosys.userscrud.exceptions.NotFoundException
 import com.morosys.userscrud.models.AuditFile
 import com.morosys.userscrud.models.User
+import com.morosys.userscrud.models.dto.AuthenticationRequest
 import com.morosys.userscrud.models.dto.UserRegistrationForm
 import com.morosys.userscrud.repositories.UserRepository
 import org.apache.coyote.BadRequestException
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.time.Instant
+import java.util.Date
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
 
 @Service
 class UserService(
     private val auditFileService: AuditFileService,
+    private val tokenService: TokenService,
+    private val authenticationService: AuthenticationService,
     private val userRepository: UserRepository,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    @Value("\${jwt.accessTokenExpiration}")
+    private val accessTokenExpiration: Long = 0,
+    private val passwordEncoder: PasswordEncoder,
 ) {
     fun findAll(): List<User> {
         return userRepository.findAll().filter { user -> user.deletedAt == null }.toList()
@@ -31,23 +40,31 @@ class UserService(
     }
 
     fun register(userRegistrationForm: UserRegistrationForm): User {
+        val username = processRegistrationUsername(userRegistrationForm.userName, userRegistrationForm.email)
         val savedUser = userRepository.save(
             User(
                 firstName = userRegistrationForm.firstName,
                 lastName = userRegistrationForm.lastName,
                 email = userRegistrationForm.email,
-                password = userRegistrationForm.password,
-                userName = userRegistrationForm.userName?.let { // If username exists, generate random userName
-                    when (checkIfUserNameTaken(it)) {
-                        true -> generateRandomUserName(userRegistrationForm.email)
-                        else -> it
-                    }
-                } ?: generateRandomUserName(userRegistrationForm.email),
-                accessToken = "" //TODO to be implemented
+                password = passwordEncoder.encode(userRegistrationForm.password),
+                userName = username,
+                accessToken = tokenService.generateToken(
+                    subject = username,
+                    expiration = Date(System.currentTimeMillis() + accessTokenExpiration)
+                )
             )
         )
 
         return savedUser
+    }
+
+    fun login(authenticationRequest: AuthenticationRequest): User {
+        val user = findByUserName(authenticationRequest.username) ?: throw NotFoundException("User not found!")
+        val authenticationResponse = authenticationService.authentication(authenticationRequest)
+
+        user.accessToken = authenticationResponse.accessToken
+
+        return user
     }
 
     fun update(id: UUID, newPassword: String?, newUserName: String?): User {
@@ -112,5 +129,14 @@ class UserService(
             true -> throw BadRequestException("Username already taken!")
             else -> userName
         }
+    }
+
+    private fun processRegistrationUsername(username: String?, email: String): String {
+        return username?.let {
+            when (checkIfUserNameTaken(it)) { // If username exists, generate random userName
+                true -> generateRandomUserName(email)
+                else -> it
+            }
+        } ?: generateRandomUserName(email)
     }
 }

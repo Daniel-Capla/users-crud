@@ -19,9 +19,9 @@ class AuthenticationService(
     private val tokenService: TokenService,
     private val refreshTokenRepository: RefreshTokenRepository,
     @Value("\${jwt.accessTokenExpiration}")
-    private val accessTokenExpiration: Long = 0,
+    private val accessTokenExpiration: Int = 0,
     @Value("\${jwt.refreshTokenExpiration}")
-    private val refreshTokenExpiration: Long = 0
+    private val refreshTokenExpiration: Int = 0
 ) {
     fun authentication(authenticationRequest: AuthenticationRequest): AuthenticationResponse {
         authManager.authenticate(

@@ -3,6 +3,7 @@ package com.morosys.userscrud.controllers
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.morosys.userscrud.exceptions.NotFoundException
 import com.morosys.userscrud.models.User
+import com.morosys.userscrud.models.dto.AuthenticationRequest
 import com.morosys.userscrud.models.dto.UserRegistrationForm
 import com.morosys.userscrud.services.UserService
 import jakarta.validation.Valid
@@ -69,6 +70,15 @@ class UserController(
         userService.delete(UUID.fromString(id))
 
         return ResponseEntity.status(HttpStatus.OK).body("Deleted!")
+    }
+
+    @PostMapping
+    fun login(
+        @RequestBody @Valid authenticationRequest: AuthenticationRequest
+    ): ResponseEntity<User> {
+        val user = userService.login(authenticationRequest)
+
+        return ResponseEntity.status(HttpStatus.OK).body(user)
     }
 
     //TODO add validation of input fields, proper login + registration, add env variables, add JWT security, add User soft delete + real delete (maybe new table for audit purposes), add tests, add github actions ci/cd?, add ip2location?
