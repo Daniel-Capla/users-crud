@@ -22,3 +22,6 @@ spring:
     locations: classpath:db/migration
 server:
   port: 8085
+
+jwt:
+  secret: { JWT_SECRET: }
