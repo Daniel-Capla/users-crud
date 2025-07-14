@@ -27,3 +27,6 @@ jwt:
   secret: ${JWT_SECRET:}
   accessTokenExpiration: ${JWT_ACCESS_TOKEN_EXPIRATION:}
   refreshTokenExpiration: ${JWT_REFRESH_TOKEN_EXPIRATION:}
+
+ip2location:
+  apiKey: ${IP2_API_KEY:}

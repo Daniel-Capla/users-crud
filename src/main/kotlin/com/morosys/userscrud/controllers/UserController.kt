@@ -6,6 +6,7 @@ import com.morosys.userscrud.models.dto.AuthenticationRequest
 import com.morosys.userscrud.models.dto.UserRegistrationForm
 import com.morosys.userscrud.models.enums.UserRole
 import com.morosys.userscrud.services.UserService
+import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Size
 import org.springframework.http.HttpStatus
@@ -54,9 +55,10 @@ class UserController(
 
     @PostMapping("/register")
     fun register(
+        request: HttpServletRequest,
         @RequestBody @Valid userForm: UserRegistrationForm
     ): ResponseEntity<User> {
-        val registeredUser = userService.register(userForm)
+        val registeredUser = userService.register(userForm, request)
 
         return ResponseEntity.status(HttpStatus.CREATED).body(registeredUser)
     }
@@ -93,9 +95,10 @@ class UserController(
 
     @PostMapping("/login")
     fun login(
+        httpServletRequest: HttpServletRequest,
         @RequestBody @Valid authenticationRequest: AuthenticationRequest
     ): ResponseEntity<User> {
-        val user = userService.login(authenticationRequest)
+        val user = userService.login(authenticationRequest, httpServletRequest)
 
         return ResponseEntity.status(HttpStatus.OK).body(user)
     }
@@ -117,5 +120,5 @@ class UserController(
 // add User soft delete + real delete (maybe new table for audit purposes) - DONE,
 // add tests,
 // add github actions ci/cd?,
-// add ip2location?
+// add ip2location? - DONE
 }

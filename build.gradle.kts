@@ -31,6 +31,7 @@ dependencies {
     implementation("jakarta.validation:jakarta.validation-api:3.1.1")
     implementation("org.springframework.boot:spring-boot-starter-validation:3.5.3")
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     developmentOnly("org.springframework.boot:spring-boot-docker-compose")

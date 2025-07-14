@@ -7,6 +7,7 @@ import com.morosys.userscrud.models.User
 import com.morosys.userscrud.models.dto.AuthenticationRequest
 import com.morosys.userscrud.models.dto.UserRegistrationForm
 import com.morosys.userscrud.repositories.UserRepository
+import jakarta.servlet.http.HttpServletRequest
 import org.apache.coyote.BadRequestException
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -21,6 +22,7 @@ class UserService(
     private val auditFileService: AuditFileService,
     private val tokenService: TokenService,
     private val authenticationService: AuthenticationService,
+    private val ip2Service: Ip2Service,
     private val userRepository: UserRepository,
     private val objectMapper: ObjectMapper,
     @Value("\${jwt.accessTokenExpiration}")
@@ -39,7 +41,7 @@ class UserService(
         return userRepository.findByUserName(userName)
     }
 
-    fun register(userRegistrationForm: UserRegistrationForm): User {
+    fun register(userRegistrationForm: UserRegistrationForm, httpServletRequest: HttpServletRequest): User {
         val username = processRegistrationUsername(userRegistrationForm.userName, userRegistrationForm.email)
         val savedUser = userRepository.save(
             User(
@@ -55,14 +57,18 @@ class UserService(
             )
         )
 
+        ip2Service.getIpLocationDetails(savedUser, httpServletRequest.remoteAddr)
+
         return savedUser
     }
 
-    fun login(authenticationRequest: AuthenticationRequest): User {
+    fun login(authenticationRequest: AuthenticationRequest, httpServletRequest: HttpServletRequest): User {
         val user = findByUserName(authenticationRequest.username) ?: throw NotFoundException("User not found!")
         val authenticationResponse = authenticationService.authentication(authenticationRequest)
 
         user.accessToken = authenticationResponse.accessToken
+
+        ip2Service.getIpLocationDetails(user, httpServletRequest.remoteAddr)
 
         return user
     }
@@ -76,6 +82,7 @@ class UserService(
 
     fun softDelete(id: UUID) {
         val userInDb = userRepository.findById(id).getOrNull() ?: throw NotFoundException("User not found")
+
         // Soft delete first
         userInDb.deletedAt = Instant.now()
 
@@ -84,6 +91,7 @@ class UserService(
 
     fun hardDelete(id: UUID) {
         val userInDb = userRepository.findById(id).getOrNull() ?: throw NotFoundException("User not found")
+
         // Create log for audit purposes first, then delete
         auditFileService.createNew(
             AuditFile(
